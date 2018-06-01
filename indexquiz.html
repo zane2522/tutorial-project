@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+    <style>
+        body{
+            background-color:black
+        }
+        #myPage .panel {
+            width: 400px;	float: left;	margin: 20px;
+        }
+        #myPage .panel-heading {
+            background-color: teal;		color: white; 
+        }		  
+        #myPage .panel-body {
+            background-color: #F0F8FF;		color: black; 
+        }
+        #myPage .panel-footer {
+            background-color: teal;		color: black; 
+        }
+        .mytext{
+            font-size: 30pt;
+            margin-left: 40px;
+            color: teal
+           
+        }
+        .jumbotron{
+           	background-color:white;
+		color:teal;
+
+		text-align: center;
+        }
+        .titles{
+            background-color:white;
+            color:black;
+            text-align:center;
+        }
+        .logo{
+            width:90%;
+        }
+      
+    </style>
+
+    <script type="text/template" id="Template">
+        <div class="panel panel-default">
+            <div class="panel-heading"> Question {{qNum}}:  {{info.question}} </div>
+            <div class="panel-body"> A. {{info.a}} </div>
+            <div class="panel-body"> B. {{info.b}} </div>
+            <div class="panel-body"> C. {{info.c}} </div>
+            <div class="panel-body"> D. {{info.d}} </div>			
+            <div class="panel-footer">
+                <input type="text" id="{{qKey}}" placeholder="Choice letter">
+            </div>
+        </div>
+    </script>
+
+    <script>
+        var data; //global variable
+
+		function getData(){       	
+			$.getJSON("https://tutorialproject-57575.firebaseio.com/.json", function(result){
+				data = result;
+                displayQuestions();	
+			});	
+		}
+	
+		// DISPLAY QUESTIONS
+		function displayQuestions(){
+			var build ="";
+			var template = document.getElementById("Template").innerHTML;  
+			var qNumber =0; // Question number
+		
+			for(var key in data){
+				qNumber++;
+				quesJSON ={
+					"info": data[key], 
+					"qKey": key,
+					"qNum": qNumber
+				}
+				build += Mustache.render(template, quesJSON);     
+			}
+			document.getElementById("quiz").innerHTML = build;							
+		}                    
+		
+		// CHECK ANSWERS AND CALCULATE SCORE
+		function checkAnswers(){
+			var score = 0;
+			var count = 0;
+			for(var key in data){
+                var correctAns = data[key].awnser;
+				var userAns = document.getElementById(key).value;				
+                count++;
+				if (userAns.toLowerCase() == correctAns){
+					score++;
+				}
+                var grd = (score/count * 100).toFixed(0);		
+			}
+            
+			document.getElementById("score").innerHTML = "<h1>You answered " + score + " out of " + count+" questions correctly!<br><br>That's a grade of<b> "+ grd + "%</b></h1>"; 
+		}
+	</script>
+</head>
+<body onload="getData()" id="myPage">
+        
+                    
+                	<nav class="navbar navbar-inverse">
+		  <div class="container-fluid">
+			<ul class="nav navbar-nav">
+			  <li class="active"><a href="index.html">Home</a></li>
+			  <li><a href="index1.html">Supervolcanoes</a></li>
+			  <li><a href="index2.html">Locations</a></li>
+			  <li><a href="index3.html">Effects</a></li>
+				<li><a href="indexquiz.html">Quiz</a></li>
+			</ul>
+		  </div>
+	  </nav>
+
+                <div class="jumbotron">
+                        <h1> QUIZ </h1>
+                        <p>Multiple Choice</p> 
+                </div>
+<nav class="navbar navbar-default">
+    
+                <div id="quiz"></div>
+                    <button onclick="checkAnswers()" type="button" class="btn btn-primary btn-lg">SCORE QUIZ</button>
+                <div id="score"></div>
+
+      
+</body>
+</html>
